@@ -1,0 +1,11 @@
+# Direct dependencies, pinned. Full resolved set: requirements.lock
+numpy==2.5.3
+scipy==1.18.1
+ranx==0.3.21
+bm25s==0.3.11
+PyStemmer==3.1.0
+torch==2.14.0
+transformers==5.17.0
+sentence-transformers==6.1.0
+pyarrow==25.0.1
+pytest==9.1.1
