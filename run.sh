@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 # Reproduce everything from scratch: environment, tests, data download, all
-# arms, metrics and significance tests. Writes results/.
+# arms, metrics, significance tests and charts. Writes results/.
 #
 #   ./run.sh                 # full run, reuses cached corpus vectors if present
 #   FRESH=1 ./run.sh         # drop cached corpus vectors first (timed from zero)
 #   VENV=/path/to/venv ./run.sh
 #   ./run.sh --no-rerank     # skip the cross-encoder experiment
+#   ./run.sh --help          # print this help and exit
+#
+# Other arguments are passed to `python -m hsm.run` (--device, --max-seconds).
 set -euo pipefail
 cd "$(dirname "$0")"
+
+case "${1:-}" in
+  -h|--help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+esac
 
 VENV="${VENV:-.venv}"
 if [ ! -x "$VENV/bin/python" ]; then
@@ -33,6 +40,9 @@ export TOKENIZERS_PARALLELISM=false
 while true; do
   status=0
   "$VENV/bin/python" -m hsm.run "$@" || status=$?
-  [ "$status" -eq 3 ] || exit "$status"
+  [ "$status" -eq 3 ] || break
   echo "[run.sh] resuming from checkpoints"
 done
+[ "$status" -eq 0 ] || exit "$status"
+
+"$VENV/bin/python" -m hsm.plot   # results/figures/ndcg10.png and metrics.png
